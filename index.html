@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteio — Análise de Perfil | Live do Felipe</title>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141c31;
+      --panel2: #1b2742;
+      --text: #f4f7ff;
+      --muted: #aab6d1;
+      --accent: #4d8dff;
+      --accent2: #7c5cff;
+      --line: #2a3858;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px 14px;
+      background: radial-gradient(circle at top, #1b2d53 0, #0b1020 48%);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .wrap {
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 18px 8px 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      color: #cbd8ff;
+      border: 1px solid #3b4f7b;
+      background: #172544;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 16px 0 8px;
+      font-size: clamp(27px, 6vw, 42px);
+      line-height: 1.1;
+    }
+
+    header p {
+      margin: 0 auto;
+      max-width: 500px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card {
+      background: rgba(20, 28, 49, .96);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 14px 38px #0003;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin: 7px 0 15px;
+    }
+
+    .participant {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 100px 42px;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    input {
+      width: 100%;
+      min-width: 0;
+      background: #0e1629;
+      border: 1px solid #344362;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 12px 11px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px #4d8dff22;
+    }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: transform .15s, opacity .15s;
+    }
+
+    button:active {
+      transform: scale(.98);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+
+    .remove {
+      background: #2b2033;
+      color: #ffb9c5;
+      font-size: 19px;
+    }
+
+    .secondary {
+      background: #253454;
+      color: #eaf0ff;
+      padding: 12px 15px;
+    }
+
+    .primary {
+      width: 100%;
+      padding: 16px;
+      color: white;
+      background: linear-gradient(110deg, var(--accent), var(--accent2));
+      font-size: 17px;
+      box-shadow: 0 8px 24px #4d8dff30;
+    }
+
+    .draw-area {
+      text-align: center;
+      padding: 26px 12px 22px;
+    }
+
+    .draw-label {
+      color: var(--muted);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 140px;
+      height: 140px;
+      margin: 17px auto;
+      border-radius: 50%;
+      border: 2px solid #5379c9;
+      background: radial-gradient(circle at 35% 25%, #2d4b86, #172342 72%);
+      font-size: 58px;
+      font-weight: 800;
+      box-shadow: 0 0 0 9px #4d8dff0d, 0 0 38px #4d8dff1a;
+    }
+
+    .number.loading {
+      animation: pulse .75s ease-in-out infinite alternate;
+      color: #c6d7ff;
+    }
+
+    @keyframes pulse {
+      from {
+        transform: scale(.94);
+        opacity: .65;
+      }
+
+      to {
+        transform: scale(1.04);
+        opacity: 1;
+      }
+    }
+
+    .result {
+      min-height: 26px;
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .subresult {
+      min-height: 20px;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status {
+      color: #b9c8e8;
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 18px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #8392b2;
+      font-size: 12px;
+      padding: 8px 0 20px;
+    }
+
+    @media (max-width: 460px) {
+      .card {
+        padding: 16px;
+      }
+
+      .participant {
+        grid-template-columns: minmax(0, 1fr) 78px 38px;
+        gap: 6px;
+      }
+
+      input {
+        padding: 11px 8px;
+        font-size: 14px;
+      }
+
+      .number {
+        width: 124px;
+        height: 124px;
+        font-size: 52px;
+      }
+
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <header>
+      <span class="eyebrow">Live do Felipe • Sorteio</span>
+
+      <h1>Análise de Perfil</h1>
+
+      <p>
+        Cadastre os participantes e seus números.
+        Quando estiver tudo pronto, aperte o botão para
+        sortear um número de 1 a 20.
+      </p>
+    </header>
+
+    <section class="card">
+      <div class="section-title">
+        <h2>Participantes</h2>
+
+        <button class="secondary" id="addBtn" type="button">
+          + Adicionar nome
+        </button>
+      </div>
+
+      <p class="hint">
+        Preencha o nome e o número de cada pessoa.
+        Os números válidos vão de 1 a 20.
+        Você poderá inserir a lista completa depois.
+      </p>
+
+      <div id="participants"></div>
+    </section>
+
+    <section class="card draw-area">
+      <div class="draw-label">Número sorteado</div>
+
+      <div class="number" id="numberDisplay">—</div>
+
+      <div class="result" id="result">
+        Pronto para sortear?
+      </div>
+
+      <div class="subresult" id="subresult">
+        O resultado aparecerá aqui.
+      </div>
+
+      <div class="status" id="status" aria-live="polite"></div>
+
+      <button class="primary" id="drawBtn" type="button">
+        SORTEAR AGORA
+      </button>
+    </section>
+
+    <div class="footer">
+      Sorteio de números de 1 a 20 • Live do Felipe
+    </div>
+
+  </main>
+
+  <script>
+    const participantsEl = document.getElementById('participants');
+    const addBtn = document.getElementById('addBtn');
+    const drawBtn = document.getElementById('drawBtn');
+
+    const numberDisplay = document.getElementById('numberDisplay');
+    const result = document.getElementById('result');
+    const subresult = document.getElementById('subresult');
+    const statusEl = document.getElementById('status');
+
+    let isDrawing = false;
+
+    function addParticipant(name = '', number = '') {
+      const row = document.createElement('div');
+      row.className = 'participant';
+
+      row.innerHTML = `
+        <input
+          type="text"
+          class="name-input"
+          placeholder="Nome da pessoa"
+          aria-label="Nome do participante"
+        >
+
+        <input
+          type="number"
+          class="number-input"
+          placeholder="Nº (1–20)"
+          min="1"
+          max="20"
+          step="1"
+          aria-label="Número do participante"
+        >
+
+        <button
+          class="remove"
+          type="button"
+          aria-label="Remover participante"
+          title="Remover"
+        >×</button>
+      `;
+
+      row.querySelector('.name-input').value = name;
+      row.querySelector('.number-input').value = number;
+
+      row.querySelector('.remove').addEventListener('click', () => {
+        if (participantsEl.children.length > 1) {
+          row.remove();
+        } else {
+          row.querySelector('.name-input').value = '';
+          row.querySelector('.number-input').value = '';
+        }
+      });
+
+      participantsEl.appendChild(row);
+    }
+
+    function getParticipants() {
+      return [
+        ...participantsEl.querySelectorAll('.participant')
+      ].map(row => ({
+        name: row.querySelector('.name-input').value.trim(),
+        number: Number(
+          row.querySelector('.number-input').value
+        )
+      })).filter(p =>
+        p.name &&
+        Number.isInteger(p.number) &&
+        p.number >= 1 &&
+        p.number <= 20
+      );
+    }
+
+    addBtn.addEventListener('click', () => {
+      addParticipant();
+    });
+
+    // Começa com uma linha para preencher.
+    addParticipant();
+
+    drawBtn.addEventListener('click', () => {
+      if (isDrawing) return;
+
+      isDrawing = true;
+
+      drawBtn.disabled = true;
+      addBtn.disabled = true;
+
+      participantsEl
+        .querySelectorAll('input, .remove')
+        .forEach(el => el.disabled = true);
+
+      numberDisplay.classList.add('loading');
+
+      result.textContent = 'Sorteando...';
+      subresult.textContent = 'Aguarde o resultado.';
+      statusEl.textContent =
+        'Carregando o sorteio (até 5 segundos)...';
+
+      // Animação durante o carregamento.
+      const animation = setInterval(() => {
+        numberDisplay.textContent =
+          Math.floor(Math.random() * 20) + 1;
+      }, 100);
+
+      // Resultado final após 5 segundos.
+      setTimeout(() => {
+        clearInterval(animation);
+
+        const drawn = Math.floor(Math.random() * 20) + 1;
+
+        numberDisplay.textContent = drawn;
+        numberDisplay.classList.remove('loading');
+
+        const matches = getParticipants().filter(
+          p => p.number === drawn
+        );
+
+        result.textContent = `Número sorteado: ${drawn}`;
+
+        if (matches.length === 1) {
+          subresult.textContent =
+            `Participante: ${matches[0].name}`;
+        } else if (matches.length > 1) {
+          subresult.textContent =
+            `Participantes com esse número: ${
+              matches.map(p => p.name).join(', ')
+            }`;
+        } else {
+          subresult.textContent =
+            'Nenhum participante cadastrado com esse número.';
+        }
+
+        statusEl.textContent = 'Sorteio concluído.';
+
+        isDrawing = false;
+        drawBtn.disabled = false;
+        addBtn.disabled = false;
+
+        participantsEl
+          .querySelectorAll('input, .remove')
+          .forEach(el => el.disabled = false);
+
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
